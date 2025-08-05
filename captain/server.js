@@ -6,6 +6,6 @@ const server = http.createServer(app)
 
 
 server.listen(3001, ()=>{
-    console.log("User Service running on port http://localhost:3001");
+    console.log("Captain Service running on port http://localhost:3001");
     
 })
