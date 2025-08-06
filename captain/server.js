@@ -5,7 +5,7 @@ const server = http.createServer(app)
 
 
 
-server.listen(3001, ()=>{
-    console.log("Captain Service running on port http://localhost:3001");
+server.listen(3002, ()=>{
+    console.log("Captain Service running on port http://localhost:3002");
     
 })

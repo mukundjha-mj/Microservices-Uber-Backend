@@ -93,5 +93,14 @@ module.exports.profile = async (req, res) => {
     }
 }
 module.exports.toggleavailability = async (req, res) => {
-    // TODO make this routes for captain availability video till watch: 1:14:33
+    try{
+        const captain = await captainModel.findById(req.captain._id);
+        captain.isAvailable  = !captain.isAvailable;
+        await captain.save();
+        res.send(captain);
+    } catch(error){
+        res.status(500).json({
+            message: error.message
+        })
+    }
 }
