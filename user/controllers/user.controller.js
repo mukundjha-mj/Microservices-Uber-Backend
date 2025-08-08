@@ -4,6 +4,9 @@ const jwt = require("jsonwebtoken")
 const bcrypt = require("bcrypt")
 const dotenv = require("dotenv");
 dotenv.config()
+const { subscribeToQueue } = require("../../ride/service/rabbit");
+const EventEmitter = require('events');
+const rideEventEmitter = new EventEmitter();
 
 module.exports.register = async (req, res) => {
     try {
@@ -92,3 +95,18 @@ module.exports.profile = async (req, res) => {
         })
     }
 }
+
+module.exports.acceptedRide = async (req, res) => {
+    rideEventEmitter.on('ride-accepted', async (data) => {
+        res.send(data);
+    });
+
+    setTimeout(()=>{
+        res.status(404).send()
+    }, 30000)
+}
+
+subscribeToQueue('ride-accepted', async(msg) => {
+    const data = JSON.parse(msg)
+    rideEventEmitter.emit('ride-accepted', data);
+});

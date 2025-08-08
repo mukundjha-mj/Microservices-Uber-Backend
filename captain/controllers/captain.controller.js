@@ -4,7 +4,9 @@ const jwt = require("jsonwebtoken")
 const bcrypt = require("bcrypt")
 const dotenv = require("dotenv");
 dotenv.config()
+const { subscribeToQueue } = require("../service/rabbit")
 
+const pendingRequest = []
 module.exports.register = async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -93,14 +95,33 @@ module.exports.profile = async (req, res) => {
     }
 }
 module.exports.toggleavailability = async (req, res) => {
-    try{
+    try {
         const captain = await captainModel.findById(req.captain._id);
-        captain.isAvailable  = !captain.isAvailable;
+        captain.isAvailable = !captain.isAvailable;
         await captain.save();
         res.send(captain);
-    } catch(error){
+    } catch (error) {
         res.status(500).json({
             message: error.message
         })
     }
 }
+
+module.exports.waitForNewRide = async (req, res) => {
+    req.setTimeout(30000, () => {
+        res.status(204).end();
+    });
+
+    pendingRequest.push(res);
+}
+
+
+subscribeToQueue("new-ride", (data) => {
+    const rideData = JSON.parse(data);
+
+    pendingRequest.forEach(res =>{
+        res.json(rideData)
+    })
+
+    pendingRequest.length = 0;
+})
